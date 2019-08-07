@@ -6,10 +6,12 @@
 ```
 
 其实应该是，在
+```
   Project Structure -> Add to Modules ... -> 当前工程
   Project窗口 -> src\main 右键 -> new -> Directory -> 创建scala目录
   scala目录右键 -> Make Directory as ... -> Sources Root
-  
+```
+
 ### Maven仓库
 标准库地址：http://repo1.maven.org/maven2/
 
