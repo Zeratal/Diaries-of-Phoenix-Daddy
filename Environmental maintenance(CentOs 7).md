@@ -103,13 +103,54 @@ export PATH=$PATH:$JAVA_HOME/bin
     result: /usr/local/bin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
   用root用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
     result: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+
+  用ethan用户通过xshell login登录，直接echo $PATH返回结果：  
+    /usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:
+    /home/ethan/jdk1.8.0_221/bin:/home/ethan/.local/bin:/home/ethan/bin
+  用root用户通过xshell login登录，直接echo $PATH返回结果：
+    /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
 ```    
+
+加入 /root/.bashrc 结尾
+```
+  用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
+    result: /usr/local/bin:/usr/bin
+  用root用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
+    result: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
+
+  用ethan用户通过xshell login登录，直接echo $PATH返回结果：  
+    /usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ethan/.local/bin:/home/ethan/bin
+  用root用户通过xshell login登录，直接echo $PATH返回结果：
+    /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ethan/jdk1.8.0_221/bin:/root/bin
+```
+
 加入 /etc/bashrc 结尾
 ``` 
   用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
     result: /usr/local/bin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
   用root用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
     result: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
+
+  用ethan用户通过xshell login登录，直接echo $PATH返回结果：  
+    /usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:
+    /home/ethan/jdk1.8.0_221/bin:/home/ethan/.local/bin:/home/ethan/bin
+  用root用户通过xshell login登录，直接echo $PATH返回结果：
+    /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ethan/jdk1.8.0_221/bin:/root/bin
 ```
+
+加入 /etc/profile 结尾
+```
+  用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
+    result: /usr/local/bin:/usr/bin
+  用root用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
+    result: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+
+  用ethan用户通过xshell login登录，直接echo $PATH返回结果：  
+    /usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:
+    /home/ethan/jdk1.8.0_221/bin:/home/ethan/.local/bin:/home/ethan/bin
+  用root用户通过xshell login登录，直接echo $PATH返回结果：
+    /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ethan/jdk1.8.0_221/bin:/root/bin
+```
+
 
 
