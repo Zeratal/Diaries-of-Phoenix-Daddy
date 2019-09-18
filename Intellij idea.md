@@ -25,3 +25,4 @@
       <url>http://maven.aliyun.com/nexus/content/repositories/central/</url>
     </mirror>
 ```
+idea自带的maven在安装路径 JetBrains\IntelliJ IDEA 2018.2.5\plugins\maven\lib\maven*\conf下
