@@ -89,5 +89,27 @@ lrwxrwxrwx. 1 root root  27 8月  14 10:13 jre-1.8.0 -> /etc/alternatives/jre_1.
 lrwxrwxrwx. 1 root root  35 8月  14 10:13 jre-1.8.0-openjdk -> /etc/alternatives/jre_1.8.0_openjdk
 lrwxrwxrwx. 1 root root  49 8月  14 10:13 jre-1.8.0-openjdk-1.8.0.181-7.b13.el7.x86_64 -> java-1.8.0-openjdk-1.8.0.181-7.b13.el7.x86_64/jre
 lrwxrwxrwx. 1 root root  29 8月  14 10:13 jre-openjdk -> /etc/alternatives/jre_openjdk
-
 ```
+
+###环境变量设置测试
+增加JAVA环境变量，如下，在不同脚本修改，效果不同
+```
+export JAVA_HOME=/home/ethan/jdk1.8.0_221
+export PATH=$PATH:$JAVA_HOME/bin
+```
+加入 /ethan/.bashrc 结尾
+```
+  用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
+    result: /usr/local/bin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
+  用root用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
+    result: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+```    
+加入 /etc/bashrc 结尾
+``` 
+  用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
+    result: /usr/local/bin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
+  用root用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
+    result: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
+```
+
+
