@@ -1,6 +1,6 @@
-JAVA环境
+# JAVA环境
 
-在虚拟机安装了CentOS7，检查环境配置发现如下,其版本连接路径是：
+## 在虚拟机安装了CentOS7，检查环境配置发现如下,其版本连接路径是：
 /usr/bin/java   软连接至 /etc/alternatives/java
 /etc/alternatives/java 软连接至 usr/lib/jvm/java-1.8.0-openjdk-1.8.0.181-7.b13.el7.x86_64/jre/bin/java
 ```
@@ -11,7 +11,7 @@ OpenJDK 64-Bit Server VM (build 25.181-b13, mixed mode)
 ```
 
 
-通过检查PATH包含各路径，在/usr/bin下可以看到java的软连接
+## 通过检查PATH包含各路径，在/usr/bin下可以看到java的软连接
 注：这里javaws.itweb是什么，什么时候被被创建
 ```
 [ethan@CentOS-Ethan bin]$ ll /usr/bin |grep java
@@ -19,7 +19,7 @@ lrwxrwxrwx.   1 root root          22 8月  14 10:13 java -> /etc/alternatives/j
 lrwxrwxrwx.   1 root root          24 8月  14 10:15 javaws -> /etc/alternatives/javaws
 -rwxr-xr-x.   1 root root        5530 4月  11 2018 javaws.itweb
 ```
-/etc/alternatives/路径下包含大量软连接，其中：
+## /etc/alternatives/路径下包含大量软连接，其中：
 1，java指向/usr/lib/jvm下java-1.8.0-openjdk-1.8.0.181-7.b13.el7.x86_64下的jre，后续分析这个路径；
 2，javaws指向/usr/bin/javaws.itweb，即/usr/bin 下的javaws指向了同目录下javaws.itweb
 ```
@@ -75,7 +75,7 @@ lrwxrwxrwx. 1 root root 62 8月  14 10:13 jre ->                /usr/lib/jvm/jav
 lrwxrwxrwx. 1 root root 62 8月  14 10:13 jre_1.8.0 ->          /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.181-7.b13.el7.x86_64/jre
 
 ```
-/usr/lib/jvm有2个java版本，其仅包含jre（不包含jdk），此目录下其他软连接要么直接指向这2个目录的jre，要么通过/etc/alternatives/再连接回本路径的两个版本之一的jre
+## /usr/lib/jvm有2个java版本，其仅包含jre（不包含jdk），此目录下其他软连接要么直接指向这2个目录的jre，要么通过/etc/alternatives/再连接回本路径的两个版本之一的jre
 ```
 [ethan@CentOS-Ethan jvm]$ ll /usr/lib/jvm
 总用量 0
@@ -91,13 +91,13 @@ lrwxrwxrwx. 1 root root  49 8月  14 10:13 jre-1.8.0-openjdk-1.8.0.181-7.b13.el7
 lrwxrwxrwx. 1 root root  29 8月  14 10:13 jre-openjdk -> /etc/alternatives/jre_openjdk
 ```
 
-###环境变量设置测试
-增加JAVA环境变量，如下，在不同脚本修改，效果不同
+# 环境变量设置测试
+## 增加JAVA环境变量，如下，在不同脚本修改，效果不同
 ```
 export JAVA_HOME=/home/ethan/jdk1.8.0_221
 export PATH=$PATH:$JAVA_HOME/bin
 ```
-加入 /ethan/.bashrc 结尾
+### 加入 /ethan/.bashrc 结尾
 ```
   用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
     result: /usr/local/bin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
@@ -111,7 +111,7 @@ export PATH=$PATH:$JAVA_HOME/bin
     /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
 ```    
 
-加入 /root/.bashrc 结尾
+### 加入 /root/.bashrc 结尾
 ```
   用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
     result: /usr/local/bin:/usr/bin
@@ -124,7 +124,7 @@ export PATH=$PATH:$JAVA_HOME/bin
     /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ethan/jdk1.8.0_221/bin:/root/bin
 ```
 
-加入 /etc/bashrc 结尾
+### 加入 /etc/bashrc 结尾
 ``` 
   用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
     result: /usr/local/bin:/usr/bin:/home/ethan/jdk1.8.0_221/bin
@@ -138,7 +138,7 @@ export PATH=$PATH:$JAVA_HOME/bin
     /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ethan/jdk1.8.0_221/bin:/root/bin
 ```
 
-加入 /etc/profile 结尾
+### 加入 /etc/profile 结尾
 ```
   用ethan用户通过 non-login 交互式访问（使用idea中用例，通过ssh2的client提交命令），返回结果：
     result: /usr/local/bin:/usr/bin
