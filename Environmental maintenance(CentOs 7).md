@@ -2,6 +2,7 @@
 
 ## 在虚拟机安装了CentOS7，检查环境配置发现如下,其版本连接路径是：
 /usr/bin/java   软连接至 /etc/alternatives/java
+
 /etc/alternatives/java 软连接至 usr/lib/jvm/java-1.8.0-openjdk-1.8.0.181-7.b13.el7.x86_64/jre/bin/java
 ```
 [ethan@CentOS-Ethan bin]$ java -version
