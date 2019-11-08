@@ -156,9 +156,10 @@ export PATH=$PATH:$JAVA_HOME/bin
 # 开发环境搭建
 
 ## gcc
+```
 yum install gcc
 gcc --version
-
+```
 ## cmake
 - 卸载原有通过 yum 安装的 cmake
 yum remove cmake
@@ -169,7 +170,7 @@ export CMAKE_HOME=/home/ethan/cmake-3.16.0-rc3-Linux-x86_64
 export PATH=$PATH:$CMAKE_HOME/bin
 ```
 - 检查版本
-``
+```
 cmake -version
 ```
 
