@@ -1,7 +1,11 @@
 ### Java中的类加载器
 
 #### java中常见的类加载器
-
+-  启动（Bootstrap）类加载器：负责装载<Java_Home>/lib下面的核心类库或-Xbootclasspath选项指定的jar包。由native方法实现加载过程，程序无法直接获取到该类加载器，无法对其进行任何操作。 另外，java中有规定以java.*开头的类必须是BootstrapClassLoader来加载的。
+  
+-  扩展（Extension）类加载器：扩展类加载器由sun.misc.Launcher.ExtClassLoader实现的。负责加载<Java_Home>/lib/ext或者由系统变量-Djava.ext.dir指定位置中的类库。程序可以访问并使用扩展类加载器。
+  
+-  系统（System）类加载器：系统类加载器是由sun.misc.Launcher.AppClassLoader实现的，也叫应用程序类加载器。负责加载系统类路径-classpath或-Djava.class.path变量所指的目录下的类库。程序可以访问并使用系统类加载器。
 
 #### 双亲委派类加载机制：
 
