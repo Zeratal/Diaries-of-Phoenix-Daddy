@@ -74,7 +74,7 @@ elif [ "${basedir}" = ".." ]
 then
     basedir=`(cd .. ;pwd)`
 fi
-//（诡异的写法，这段代码冗余，当不是脚本当前目录执行或者子目录执行，basedir就是一个相对路径，后面复制的时候依然用了相对路径，如果这期间有cd更改目录，这段代码就挂了，还不如直接basedir = "$(cd "`dirname "$0"`"; pwd)"）
+/*诡异的写法，这段代码冗余，当不是脚本当前目录执行或者子目录执行，basedir就是一个相对路径，后面复制的时候依然用了相对路径，如果这期间有cd更改目录，这段代码就挂了，还不如直接basedir = "$(cd "`dirname "$0"`"; pwd)"*/
 .......
 
 PROJ_INSTALL_DIR=`(cd ${basedir} ; pwd)`
