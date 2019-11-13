@@ -313,4 +313,4 @@ fi
 ```
 
 ##### 后续处理
-atlas，sqoop，kylin，和presto有些附加操作，但是hdfs则没有，这里直接打印提示重启hadoop，然后正常退出
+knox, storm, atlas，sqoop，kylin，和presto有些附加操作，但是hdfs则没有，这里直接打印提示重启hadoop，然后正常退出
