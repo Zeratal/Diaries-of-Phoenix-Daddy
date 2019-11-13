@@ -291,9 +291,11 @@ fi
 ##### 创建库连接
 ```
 1,  如果action是enable
-    是  遍历${PROJ_INSTALL_DIR}/lib，判断${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib路径是否有同名文件或者文件夹
-        是  原地mv到备份（这里有点问题，如果原地mv，则此文件丢失）
-        否  创建${PROJ_INSTALL_DIR}/lib/* 到 ${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib的连接
+    是  遍历${PROJ_INSTALL_DIR}/lib。
+        判断${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib路径是否有同名文件或者文件夹
+          是  原地mv到备份（这里有点问题，如果原地mv，则此文件丢失。！没有问题，因为后面再次判断时候存在同名文件或文件夹）
+	判断${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib路径是否有同名文件或者文件夹
+          否  创建${PROJ_INSTALL_DIR}/lib/* 到 ${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib的连接
 ```
 ##### 创建凭证文件路径
 ```
