@@ -113,7 +113,7 @@ else
 	action=disable
 fi
 ```
-6,环境变量设置
+##### 环境变量设置
 ```
 PROJ_INSTALL_DIR=`(cd ${basedir} ; pwd)`          // /home/ethan/workspace/release/ranger-2.0.1-SNAPSHOT-hdfs-plugin
 SET_ENV_SCRIPT_NAME=set-${COMPONENT_NAME}-env.sh     //set-hdfs-plugin-env.sh
@@ -127,8 +127,8 @@ COMPONENT_INSTALL_ARGS="${PROJ_INSTALL_DIR}/${COMPONENT_NAME}-install.properties
 PLUGIN_DEPENDENT_LIB_DIR=lib/"${PROJ_NAME}-${COMPONENT_NAME}-impl"   //   lib/ranger-hdfs-plugin-impl/
     PROJ_LIB_PLUGIN_DIR=${PROJ_INSTALL_DIR}/${PLUGIN_DEPENDENT_LIB_DIR}  //目录存在
 ```
-7，参数获取
-- 用户权限
+##### 参数获取
+用户权限
 ```
 /*一整段的CUSTOM家族配置，最后为了得到一个CFG_OWNER_INF*/
 CUSTOM_USER=$(getInstallProperty 'CUSTOM_USER')
@@ -165,7 +165,8 @@ else
   CFG_OWNER_INF="${HCOMPONENT_NAME}:${HCOMPONENT_NAME}"
 fi
 ```
-- 组件依赖和配置
+##### 组件依赖和配置
+
 从脚本解析过程看，我们应该把HCOMPONENT_INSTALL_DIR_NAME这个参数，配置为对应组件的安装路径，比如hadoop为$HADOOP_HOME.那么就没有后续一堆软连接的操作了，而且组件安装路径未配置的情况下，默认路径很诡异，软连接很容易设置错误。
 ```
 /*关键配置*/
@@ -217,7 +218,7 @@ elif [ "${HCOMPONENT_NAME}" = "yarn" ]; then
 HCOMPONENT_ARCHIVE_CONF_DIR=${HCOMPONENT_CONF_DIR}/.archive    /*不存在 $HADOOP_HOME/etc/hadoop/.archive*/
 SET_ENV_SCRIPT=${HCOMPONENT_CONF_DIR}/${SET_ENV_SCRIPT_NAME}   /*不存在  $HADOOP_HOME/etc/hadoop/set-hadoop-plugin-env.sh   */
 ```
-8，检查组件安装目录，组件配置目录，组件库目录
+##### 检查组件安装目录，组件配置目录，组件库目录
 ```
 if [ ! -d "${HCOMPONENT_INSTALL_DIR}" ]
 then
@@ -245,7 +246,7 @@ then
 fi
 ```
 
-9，预处理
+##### 预处理
 - set-hdfs-plugin-env.sh(不存在)
 这段脚本比较古怪，但是其实它不会执行，因为它判断了 ./install/conf.templates/enable/set-hdfs-plugin-env.sh 存在与否，而安装包没有携带此脚本
 ```
@@ -261,7 +262,7 @@ fi
 	               删除 hadoop-config.sh 里的 ‘xasecure-.*-env.sh’ 行
                        判断hadoop-config.sh里是否包含了set-hadoop-plugin-env.sh行，如果是则**，如果不是则报告hadoop-config.sh包含了hadoop-env.sh（不理解）
 ```
-- enable|disable配置处理
+##### enable|disable配置处理
 
 ```
 1,  判断 ${PROJ_INSTALL_DIR}/install/conf.templates/${action} 是否存在（必然存在）
@@ -287,21 +288,21 @@ fi
 	       通过org.apache.ranger.utils.install.XmlConfigChanger比较conf文件，和备份文件（入参为${PROJ_INSTALL_DIR}/install.properties，-cp参数为${PROJ_INSTALL_DIR}/install/lib/*）
 	       合并后的文件覆盖原xml
 ```
-- 创建库连接
+##### 创建库连接
 ```
 1,  如果action是enable
     是  遍历${PROJ_INSTALL_DIR}/lib，判断${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib路径是否有同名文件或者文件夹
         是  原地mv到备份（这里有点问题，如果原地mv，则此文件丢失）
         否  创建${PROJ_INSTALL_DIR}/lib/* 到 ${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib的连接
 ```
-- 创建凭证文件路径
+##### 创建凭证文件路径
 ```
 继承上文的 如果action是enable
   2,  获取CREDENTIAL_PROVIDER_FILE文件路径（/etc/ranger/hadoopdev/cred.jceks），如果无效路径则报错退出
       创建该文件路径（如果不存在），并修改权限为a+rx      
 ```
 
-- 为SSL密钥库和信任库生成凭据提供程序文件和凭据
+##### 为SSL密钥库和信任库生成凭据提供程序文件和凭据
 ```
 继承上文的 如果action是enable
   3,  从配置文件获取SSL_KEYSTORE_PASSWORD和SSL_TRUSTSTORE_PASSWORD；分别和sslKeyStore，sslTrustStore调用create_jceks写入cred.jceks（上节）
@@ -309,5 +310,5 @@ fi
       修改cred.jceks的权限和所有者
 ```
 
-- 后续处理
+##### 后续处理
 atlas，sqoop，kylin，和presto有些附加操作，但是hdfs则没有，这里直接打印提示重启hadoop，然后正常退出
