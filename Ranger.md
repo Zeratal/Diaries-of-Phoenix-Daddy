@@ -1,26 +1,100 @@
+Ranger
+-------------------
+
+[TOC]
+
 ## 编译
+
+### 前置软件
+```
+JAVA 
+MAVEN
+PYTHON
+GIT
+ ...
+```
+### 编译命令
 ```
 mvn compile package assembly:assembly install -DskipTests -Drat.skip=true -X
 mvn -DskipTests=false clean compile package install assembly:assembly 
 注意：第二行是官网命令，但是其实-DskipTests=false会导致编译不过，去掉后面的=false
 ```
-### 前置
-```
-JAVA MAVEN PYTHON GIT ...
-```
+## Admin安装
 
-## 安装
-
-由于选择postgres为ranger数据库，官网仅描述支持，并没有对应的配置修改文档。自己摸索吧
+由于选择postgres为ranger数据库，官网仅描述支持，并没有对应的配置修改文档。自己摸索吧(DB_FLAVOR和SQL_CONNECTOR_JAR配置)
 ### pg预设
 ```
-PG安装好后，其实不需要手动创建ranger的库，第一次部署，是因为配置没有localhost所以导致pg连接不上，setup的报错信息不准确
+PG安装好后，其实不需要手动创建ranger的库，第一次部署，是因为配置没有localhost所以导致pg连接不上，setup的报错信息不准确。
 ```
 
-### hdfs plugins
+### 配置修改
+修改主目录下install.properties文件
+- PYTHON_COMMAND_INVOKER 参数在后续setup.sh里没有使用，而是直接使用了"python"，建议修改该脚本引用python的地方为$PYTHON_COMMAND_INVOKER，这样可以在安装多python版本时指定对应的版本
+- db_host 配置理论上应该带port，但是这里没带也正常工作了，后续进一步测试加上port
+- audit_store相关配置没有配，后续研究其作用再补充
+```
+#------------------------- DB CONFIG - BEGIN ----------------------------------
+# Uncomment the below if the DBA steps need to be run separately
+setup_mode=SeparateDBA
+PYTHON_COMMAND_INVOKER=python
+DB_FLAVOR=POSTGRES
+
+# Location of DB client library (please check the location of the jar file)
+SQL_CONNECTOR_JAR=/usr/share/java/postgresql.jar
+
+# DB password for the DB admin user-id
+# **************************************************************************
+# ** If the password is left empty or not-defined here,
+# ** it will try with blank password during installation process
+# **************************************************************************
+#db_host=host:port              # for DB_FLAVOR=MYSQL|POSTGRES|SQLA|MSSQL       #for example: b_host=localhost:3306
+db_root_user=postgres
+db_root_password=postgres
+db_host=ethan
+
+#
+# DB UserId used for the Ranger schema
+#
+db_name=ranger
+db_user=ranger
+db_password=ranger
+
+#此配置文档介绍要配置，但本次实践没有配置，可能admin UI偶尔报audit无法获取有关
+#audit_store=db
+#audit_db_name=ranger_audit
+#audit_db_user=root
+#audit_db_password=root
+
+#
+# ------- UNIX User CONFIG ----------------
+#
+unix_user=ranger
+unix_user_pwd=ranger
+unix_group=ranger
+
+#
+# ------- PolicyManager CONFIG ----------------
+#
+policymgr_external_url=http://localhost:6080
+#policymgr_http_enabled=true
+```
+### setup.sh解析
+
+```
+
+
+```
+
+##  hdfs plugins
 研究半天，发现走入一个误区，这些插件是应该在组件节点启动的，而不是admin节点。
-目测是不需要root权限的，普通权限下部署测试
-#### vim install.properties
+另外，目测是不需要root权限的。需要特别关注2个问题：
+1. 修改脚本，规避默认的文件配置(/etc/ranger/)这个路径。需要观察谁在使用，如何使用这个路径，理论上就是hdfs启动plugin功能时会用到，如果该路径可修改，则改到当前用户目录即可。
+2. 另外enable脚本多次修改目录及文件的拥有者权限，如果我们在指定目录下安装，配置，是不需要root权限的（如果安装用户和配置用户不一致，才需要root用户安装，并将所有者修改为配置用户）
+
+### 配置修改
+修改主目录下install.properties文件
+**注意：此文件增加 COMPONENT_INSTALL_DIR_NAME配置**
+
 ```
 POLICY_MGR_URL=http://ethan:6080
 REPOSITORY_NAME=hadoopdev
@@ -41,21 +115,30 @@ CUSTOM_USER=ethan
 # CUSTOM_COMPONENT_GROUP=<custom-group>
 # keep blank if component group is default
 CUSTOM_GROUP=ethan
+
+#**注意：此行重要，这里其实配置的是 $HADOOP_HOME**
+COMPONENT_INSTALL_DIR_NAME=/home/ethan/workspace/release/hadoop-2.7.3
 ```
 
-#### 版本拷贝
+### 版本拷贝
+需要注意的是，plugin的版本需要拷贝到组件所在节点，如本实践，要拷贝到hdfs的namenode所在的节点。准确的说，plugin本身并不会自己启动。而是通过enable脚本，往hadoop驻入自己提供的库，配置，并修改hdfs组件的鉴权参数以及鉴权实例为自己。然后hdfs重启后，在内部启动鉴权相关的服务。
 ```
  scp -r ranger-2.0.1-SNAPSHOT-hdfs-plugin/ ethan1:/home/ethan/workspace/release/
  scp -r ranger-2.0.1-SNAPSHOT-hdfs-plugin/ ethan2:/home/ethan/workspace/release/
 ```
-#### 软连接hadoop库和配置
+### 软连接hadoop库和配置（过时）
+  这个操作来源于Aanger官网的wiki，但其对应版本是ranger-0.5，已经过时。
+  在ranger-2.0版本里，由于我们之前在install.properties里配置了**COMPONENT_INSTALL_DIR_NAME**，所以后面enable-hdfs-plugin.sh会根据组件路径，正确的找到组件的配置路径和共享库路径。
+(https://cwiki.apache.org/confluence/display/RANGER/Ranger+Installation+Guide#RangerInstallationGuide-Install/ConfigureRangerHDFSPlugin)
+这里的软连接其实就是为了enable-hdfs-plugin.sh能找到组件安装目录，在配置和库路径增加修改plugin相关内容
+（创建 ${PROJ_INSTALL_DIR}/lib/*  到 ${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib的连接）
 ```
 ln -s $HADOOP_HOME/share/hadoop/hdfs/lib ./hadoop/lib
 ln -s $HADOOP_HOME/etc/hadoop/ ./hadoop/conf
 ```
-#### enable-hdfs-plugin.sh解析
-##### 运行环境检查
-1，通过判断当前用户是否有root权限（为什么要root）
+### enable-hdfs-plugin.sh解析
+#### 运行环境检查
+1，通过判断当前用户是否有root权限（为什么要root？仅仅是因为后面“SSL密钥库和信任库生成凭据文件”默认是保存在/etc下。另外，多次调用了chown和chmod）
 ```
 if [ ! -w /etc/passwd ]
 then
@@ -80,6 +163,7 @@ fi
 PROJ_INSTALL_DIR=`(cd ${basedir} ; pwd)`
 ```
 4，获取组件名称
+组件名称是脚本用到的一个变量，从脚本名称解析出来的。所以如果要开发自己的插件，写启动（其实应该是安装或者嵌入）脚本时，注意脚本名称要保持风格。
 ```
 COMPONENT_NAME=`basename $0 | cut -d. -f1 | sed -e 's:^disable-::' | sed -e 's:^enable-::'`
 
@@ -102,7 +186,8 @@ then
 	HCOMPONENT_NAME="hadoop"
 fi
 ```
-5，根据脚本名字判断当前是打开还是关闭plugin
+5，获取action类型
+因为插件脚本，enable和disable脚本除了名字，内容完全一样（好作坊风），此处根据脚本名字判断当前是打开还是关闭plugin
 ```
 basename $0 | cut -d. -f1 | grep '^enable-' > /dev/null 2>&1
 
@@ -113,7 +198,7 @@ else
 	action=disable
 fi
 ```
-##### 环境变量设置
+#### 环境变量设置
 ```
 PROJ_INSTALL_DIR=`(cd ${basedir} ; pwd)`          // /home/ethan/workspace/release/ranger-2.0.1-SNAPSHOT-hdfs-plugin
 SET_ENV_SCRIPT_NAME=set-${COMPONENT_NAME}-env.sh     //set-hdfs-plugin-env.sh
@@ -127,7 +212,7 @@ COMPONENT_INSTALL_ARGS="${PROJ_INSTALL_DIR}/${COMPONENT_NAME}-install.properties
 PLUGIN_DEPENDENT_LIB_DIR=lib/"${PROJ_NAME}-${COMPONENT_NAME}-impl"   //   lib/ranger-hdfs-plugin-impl/
     PROJ_LIB_PLUGIN_DIR=${PROJ_INSTALL_DIR}/${PLUGIN_DEPENDENT_LIB_DIR}  //目录存在
 ```
-##### 参数获取
+#### 参数获取
 用户权限
 ```
 /*一整段的CUSTOM家族配置，最后为了得到一个CFG_OWNER_INF*/
@@ -165,7 +250,7 @@ else
   CFG_OWNER_INF="${HCOMPONENT_NAME}:${HCOMPONENT_NAME}"
 fi
 ```
-##### 组件依赖和配置
+#### 组件依赖和配置
 
 从脚本解析过程看，我们应该把HCOMPONENT_INSTALL_DIR_NAME这个参数，配置为对应组件的安装路径，比如hadoop为$HADOOP_HOME.那么就没有后续一堆软连接的操作了，而且组件安装路径未配置的情况下，默认路径很诡异，软连接很容易设置错误。
 ```
@@ -218,7 +303,7 @@ elif [ "${HCOMPONENT_NAME}" = "yarn" ]; then
 HCOMPONENT_ARCHIVE_CONF_DIR=${HCOMPONENT_CONF_DIR}/.archive    /*不存在 $HADOOP_HOME/etc/hadoop/.archive*/
 SET_ENV_SCRIPT=${HCOMPONENT_CONF_DIR}/${SET_ENV_SCRIPT_NAME}   /*不存在  $HADOOP_HOME/etc/hadoop/set-hadoop-plugin-env.sh   */
 ```
-##### 检查组件安装目录，组件配置目录，组件库目录
+#### 检查组件安装目录，组件配置目录，组件库目录
 ```
 if [ ! -d "${HCOMPONENT_INSTALL_DIR}" ]
 then
@@ -246,7 +331,7 @@ then
 fi
 ```
 
-##### 预处理
+#### 预处理
 - set-hdfs-plugin-env.sh(不存在)
 这段脚本比较古怪，但是其实它不会执行，因为它判断了 ./install/conf.templates/enable/set-hdfs-plugin-env.sh 存在与否，而安装包没有携带此脚本
 ```
@@ -262,7 +347,7 @@ fi
 	               删除 hadoop-config.sh 里的 ‘xasecure-.*-env.sh’ 行
                        判断hadoop-config.sh里是否包含了set-hadoop-plugin-env.sh行，如果是则**，如果不是则报告hadoop-config.sh包含了hadoop-env.sh（不理解）
 ```
-##### enable|disable配置处理
+#### enable|disable配置处理
 
 ```
 1,  判断 ${PROJ_INSTALL_DIR}/install/conf.templates/${action} 是否存在（必然存在）
@@ -288,7 +373,7 @@ fi
 	       通过org.apache.ranger.utils.install.XmlConfigChanger比较conf文件，和备份文件（入参为${PROJ_INSTALL_DIR}/install.properties，-cp参数为${PROJ_INSTALL_DIR}/install/lib/*）
 	       合并后的文件覆盖原xml
 ```
-##### 创建库连接
+#### 创建库连接
 ```
 1,  如果action是enable
     是  遍历${PROJ_INSTALL_DIR}/lib。
@@ -297,14 +382,14 @@ fi
 	判断${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib路径是否有同名文件或者文件夹
           否  创建${PROJ_INSTALL_DIR}/lib/* 到 ${HCOMPONENT_INSTALL_DIR}/share/hadoop/hdfs/lib的连接
 ```
-##### 创建凭证文件路径
+#### 创建凭证文件路径
 ```
 继承上文的 如果action是enable
   2,  获取CREDENTIAL_PROVIDER_FILE文件路径（/etc/ranger/hadoopdev/cred.jceks），如果无效路径则报错退出
       创建该文件路径（如果不存在），并修改权限为a+rx      
 ```
 
-##### 为SSL密钥库和信任库生成凭据提供程序文件和凭据
+#### 为SSL密钥库和信任库生成凭据提供程序文件和凭据
 ```
 继承上文的 如果action是enable
   3,  从配置文件获取SSL_KEYSTORE_PASSWORD和SSL_TRUSTSTORE_PASSWORD；分别和sslKeyStore，sslTrustStore调用create_jceks写入cred.jceks（上节）
@@ -312,5 +397,6 @@ fi
       修改cred.jceks的权限和所有者
 ```
 
-##### 后续处理
+#### 后续处理
 knox, storm, atlas，sqoop，kylin，和presto有些附加操作，但是hdfs则没有，这里直接打印提示重启hadoop，然后正常退出
+
